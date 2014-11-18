@@ -1,0 +1,187 @@
+from tkinter import *
+import csv
+
+class Window:
+
+    def __init__(self, win):
+        win.title("Word Search Generator")
+        self.fmain = Frame(win,borderwidth=2)
+        self.fmain.grid(row=0,column=0)
+        self.f = Frame(self.fmain,borderwidth=3)
+        self.f.grid(row=4,column=1)
+        self.fB = Frame(self.fmain)
+        self.fB.grid(row=4,column=2)
+        self.bar = Frame(self.fmain)
+        self.bar.grid(row=5,column=1)
+
+        self.sv = StringVar()
+        self.sv.set(":D")
+        self.sv2 = StringVar()
+        self.sv2.set(":D")
+
+        l1 = Label(self.fmain, text="Word Search File:").grid(row=0,column=0)
+
+        l2 = Label(self.fmain, text="Word Bank File:").grid(row=1,column=0)
+
+        self.search = Entry(self.fmain, width=100, text=self.sv, state="readonly")
+        self.search.grid(row=0,column=1)
+
+        self.bank = Entry(self.fmain, width=100, text=self.sv2, state="readonly")
+        self.bank.grid(row=1,column=1)
+
+        self.b1 = Button(self.fmain, text="Select File", command=self.openWSClicked).grid(row=0,column=2)
+
+        self.b2 = Button(self.fmain, text="Select File", command=self.openWBClicked).grid(row=1,column=2)
+
+        self.b3 = Button(self.fmain, text="Generate Word Search", command=self.readFile).grid(row=2,column=0, sticky=W)
+
+    def openWSClicked(self):
+        self.searchFile = filedialog.askopenfilename()
+        self.sv.set(self.searchFile)
+
+    def openWBClicked(self):
+        self.bankFile = filedialog.askopenfilename()
+        self.sv2.set(self.bankFile)
+
+    def readFile(self):        
+        bank = open(self.bankFile)
+        search = open(self.searchFile)
+        self.wordSearchLines = []
+        self.wordBank = []
+        rb = csv.reader(bank)
+        rs = csv.reader(search)
+        for item in rs:
+            self.wordSearchLines.append(item)
+        for item in rb:
+            self.wordBank.append(item)
+        self.generate()
+
+    def generate(self):
+        self.letters = []
+        self.words = []
+        t = Label(self.fmain, text="Find the CS Vocab!")
+        t.grid(row=3, column=1)
+        wb = Label(self.fB, text="Word Bank")
+        wb.grid(row=0, column=0,sticky=W)
+        count=4
+        for item in self.wordSearchLines:
+            for x in item:
+                for y in range(len(x)):
+                    aStr = x[y]
+                    aStr.strip()
+                    self.wsl = Label(self.f, text=aStr)
+                    self.wsl.grid(row=count, column=y)
+                    self.letters.append((count-4,y,self.wsl))
+            count+=1
+
+        self.e1 = Entry(self.bar,width=30)
+        self.e1.grid(row=count, column=0)
+        self.look = Button(self.bar, text="Find", command=self.findStartingCoords)
+        self.look.grid(row=count, column=1)
+
+        count = 4
+        for item in self.wordBank:
+            for x in item:
+                x.strip()
+                self.wb = Label(self.fB, text=x.upper())
+                self.wb.grid(row=count,column=0)
+                self.words.append(self.wb)
+            count+=1
+
+    def findStartingCoords(self):
+        word = self.e1.get()
+        word = word.upper()
+        letter = word[0]
+        self.aList = []
+        for item in range(len(self.wordSearchLines)):
+            for x in self.wordSearchLines[item]:
+                for y in range(len(x)):
+                    if x[y]==letter:
+                        aTup = (item,y)
+                        self.aList.append(aTup)
+        self.find()
+
+    def find(self):
+        word = self.e1.get().upper()
+        self.coordList = []
+        wordList = []
+        for item in self.words:
+            wordList.append(item["text"])
+        if word not in wordList:
+            m = messagebox.showinfo(title="Uh oh", message="Uh oh... there are no matches for that word. Please input a new word")
+        else:
+            for coord in self.aList:
+                directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+                direzione = []
+                counter = 1
+                for d in directions:
+                    try:
+                        assert self.wordSearchLines[coord[0] + d[0]][0][coord[1] + d[1]] == word[counter]
+                        direzione.append(d)
+                    except:
+                        pass
+                    
+                while len(direzione) > 1:
+                    counter+=1
+                    for d in direzione:
+                        if coord[0]+counter*d[0] in range(len(self.wordSearchLines)) and coord[1]+counter*d[1] in range(len(self.wordSearchLines[coord[0]+counter*d[0]][0])):
+                            try:
+                                word[counter]
+                                try:
+                                    assert self.wordSearchLines[coord[0]+counter*d[0]][0][coord[1]+counter*d[1]] == word[counter]
+                                except:
+                                    direzione.remove(d)
+                            except:
+                                direzione.remove(d)
+                        else:
+                            direzione.remove(d)
+                    if len(direzione) == 1:
+                        counter=0
+                        for x in range(len(word)):
+                            try:
+                                word[counter]
+                                if self.wordSearchLines[coord[0]+counter*(direzione[0][0])][0][coord[1]+counter*(direzione[0][1])] == word[counter]:
+                                    self.coordList.append((coord[0]+counter*(direzione[0][0]),coord[1]+counter*(direzione[0][1])))
+                                    counter += 1
+                            except:
+                                self.coordlist=[]
+                        if len(self.coordList) != len(word):
+                            self.coordList = []
+                        elif len(self.coordList) == len(word):
+                            direzione = [d]
+                            self.updateGUI()
+
+                if len(direzione) == 1:
+                        counter=0
+                        for x in range(len(word)):
+                            try:
+                                word[counter]
+                                if self.wordSearchLines[coord[0]+counter*(direzione[0][0])][0][coord[1]+counter*(direzione[0][1])] == word[counter]:
+                                    self.coordList.append((coord[0]+counter*(direzione[0][0]),coord[1]+counter*(direzione[0][1])))
+                                    counter += 1
+                            except:
+                                self.coordlist=[]
+                        if len(self.coordList) != len(word):
+                            self.coordList = []
+                        elif len(self.coordList) == len(word):
+                            direzione = [d]
+                            self.updateGUI()
+        
+
+    def updateGUI(self):
+        word = self.e1.get().upper()
+        for x in self.words:
+            if x["text"]==word:
+                x.config(fg="grey")
+        for x in self.letters:
+            for y in self.coordList:
+                if x[0]==y[0] and x[1]==y[1]:
+                    print("gaga")
+                    x[2].config(bg="yellow")
+                              
+        
+
+app = Tk()
+aWin = Window(app)
+app.mainloop()
+
