@@ -1,0 +1,198 @@
+from tkinter import *
+import urllib.request
+from re import findall
+import csv
+
+class infoWin:
+    def __init__(self,aWin):
+        aWin.title("City of Shamalamadingdong")
+        Frame1 = Frame(aWin)
+        Frame1.grid(row=0,column=2, rowspan=7)
+        #column0+1
+        b1 = Button(aWin, text = "Load Input CSV File", command = self.loadCSVclicked).grid(row = 0, column = 0, columnspan = 2, sticky = W+E)
+        l1 = Label(aWin, text = "File Path").grid(row = 1, column = 0, columnspan = 2)
+        l2 = Label(aWin, text = "Input CSV File").grid(row = 2, column = 0)
+        #e2 sets width of all entries
+        self.sve2 = StringVar()
+        self.sve4 = StringVar()
+        e2 = Entry(aWin, state = "readonly", textvariable = self.sve2, width = 50).grid(row = 2, column = 1)
+        l3 = Label(aWin, text = "Website URL").grid(row = 3, column = 0)
+        self.e3 = Entry(aWin)
+        self.e3.grid(row = 3, column = 1, sticky = W+E)
+        l4 = Label(aWin, text = "Output CSV File").grid(row = 4, column = 0)
+        self.e4 = Entry(aWin, textvariable = self.sve4, state = "readonly")
+        self.e4.grid(row = 4, column = 1, sticky = W+E)
+        self.b2 = Button(aWin, text = "Process Data", command = self.PDclicked, state = DISABLED)
+        self.b2.grid(row=5, column=0, columnspan=2, sticky=W+E)
+        
+        #column2
+        self.svb = StringVar()
+        self.svc = StringVar()
+        self.svd = StringVar()
+        self.sve = StringVar()
+        self.svf = StringVar()
+        self.svg = StringVar()
+        
+        la = Label(Frame1, text = "Employees Per Department:"). grid(row=0, column=0, columnspan=2)
+        lb = Label(Frame1, text = "Environment").grid(row=1, column=0)
+        self.lb2 = Label(Frame1, textvariable = self.svb).grid(row=1, column=1)
+        lc = Label(Frame1, text = "Education").grid(row=2, column=0)
+        self.lc2 = Label(Frame1, textvariable = self.svc).grid(row=2, column=1)
+        ld = Label(Frame1, text = "Human Resources").grid(row=3, column=0)
+        self.ld2 = Label(Frame1, textvariable = self.svd).grid(row=3, column=1)
+        le = Label(Frame1, text = "Public Works").grid(row=4, column=0)
+        self.le2 = Label(Frame1, textvariable = self.sve).grid(row=4, column=1)
+        lf = Label(Frame1, text = "Transportation").grid(row=5, column=0)
+        self.lf2 = Label(Frame1, textvariable = self.svf).grid(row=5, column=1)
+        lg = Label(Frame1, text = "Total").grid(row=6, column=0)
+        self.lg2 = Label(Frame1, textvariable = self.svg).grid(row=6, column=1)
+
+        #String Vars for number of employees per department
+        #Makes for an easier gui update later with StringVars
+        self.svb.set("-")
+        self.svc.set("-")
+        self.svd.set("-")
+        self.sve.set("-")
+        self.svf.set("-")
+        self.svg.set("-")
+
+
+
+    def loadCSVclicked(self):
+        self.file = filedialog.askopenfilename()
+        self.aVar = self.loadCSVfile()            
+
+    def loadCSVfile(self):
+        self.csvList = []
+        try:
+            f = open(self.file)
+            r = csv.reader(f)
+            for item in r:
+                self.csvList.append(item)
+            self.sve2.set(self.file)
+            self.b2.config(state = NORMAL)
+            
+        except:
+            #if file selected isn't readable by csv.reader
+            warning = messagebox.showinfo( message = "Sorry, invalid file.")
+
+    def PDclicked(self):
+        self.url = self.e3.get()
+        self.downloadSalaryData()
+
+    def downloadSalaryData(self):
+        #Create a list of lists, e.g.: [[Name, Salary, Department],[Leslie Knope, 13900, Parks and Rec]]
+        response = urllib.request.urlopen(self.url)
+        html = response.read()
+        htmlStr = html.decode()
+        salaries = findall("(?:td>)(\-|\d{3,10})", htmlStr)
+        print("salaries:", len(salaries))
+        names = findall("<tr><td>(\D{3,10}.\D{3,10})</td>", htmlStr)
+        names = names[1:]
+        print("names:", len(names))
+        departments = findall("(?:</td><td>)([a-zA-Z]{3,16}.\D{3,16})</td></tr>", htmlStr)
+        departments = departments[1:]
+        print("deps:", len(departments))
+        self.htmldata = [["Name","Salary","Department"]]
+        for item in range(len(names)):
+            aList = [names[item],salaries[item],departments[item]]
+            self.htmldata.append(aList)
+        self.convertHTMLtoCSVFormat()
+        
+    def convertHTMLtoCSVFormat(self):
+        #change self.htmldata to new format: [[Last Name, First Name, Department, Salary],[....]]
+        self.csvdata = [["Last Name","First Name", "Department","Salary"]]
+        for item in range(len(self.htmldata)):
+            if item!=0:
+                aVar = self.htmldata[item][0].split()
+                self.csvdata.append([aVar[1],aVar[0],self.htmldata[item][2],self.htmldata[item][1]])
+        self.mergeData()
+                
+                
+
+    def mergeData(self):
+        #Collect data from the given csv file and merge with self.csvdata
+        #self.csvdata == html and self.csvList == given csv
+        self.aDict = {}
+        for item in range(len(self.csvList)):
+            if item!=0:
+                self.aDict[self.csvList[item][0]+", "+self.csvList[item][1]] = self.csvList[item]
+        for item in self.aDict.keys():
+            value = self.aDict[item]
+            try:
+                value = int(value[3])
+            except:
+                for x in self.csvdata:
+                    aName = x[0]+", "+x[1]
+                    if aName == item:
+                        try:
+                            s = x[3]
+                            s = int(s)
+                            value[3] = s
+                            self.aDict[item] = value
+                        except:
+                            pass
+        #Adds the data from the HTML to the dict
+        for item in self.csvdata[1:]:
+            name = item[0]+", "+item[1]
+            if name not in self.aDict.keys():
+                self.aDict[name] = item
+        for item in self.aDict.keys():
+            value = self.aDict[item]
+            if value[2] == "Parks and Recreation":
+                value[2] = "Environment"
+                self.aDict[item] = value
+        self.saveData()
+
+    def saveData(self):
+        #Output csv in format: "Last name, First name", Salary, Department
+        sortedList = []
+        aList = ["Education", "Environment", "Human Resources", "Public Works","Transportation"]
+        for dep in aList:
+            depList = []
+            for item in self.aDict.keys():
+                value = self.aDict[item]
+                if value[2] == dep:
+                    depList.append([item, value[3], value[2]])
+            depList.sort()
+            for x in depList:
+                sortedList.append(x)
+        f = filedialog.asksaveasfilename()
+        self.sve4.set(f)
+        f = open(f, 'w', newline = "")
+        w = csv.writer(f)
+        #This row titles the columns in the output csv
+        row = ["Name", "Salary", "Department"]
+        w.writerow(row)
+        for item in sortedList:
+            row = item
+            w.writerow(row)
+        f.close()
+        self.calculate()
+        
+
+    def calculate(self):
+        #Counts number of employees in each department and total then updates gui
+        varList = [self.svb, self.svc, self.svd, self.sve, self.svf]
+        aList = ["Education", "Environment", "Human Resources", "Public Works", "Transportation"]
+        total = 0
+        for num in range(len(aList)):
+            dep = aList[num]
+            depList = []
+            for item in self.aDict.keys():
+                value = self.aDict[item]
+                if value[2] == dep:
+                    depList.append([item, value[3], value[2]])
+            count = len(depList)
+            varList[num].set(count)
+            total += count
+        self.svg.set(total)
+        
+        
+
+
+
+app = Tk()
+win = infoWin(app)
+app.mainloop()
+
