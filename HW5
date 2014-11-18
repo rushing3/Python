@@ -1,0 +1,139 @@
+
+from tkinter import *
+import csv
+
+class HW5:
+
+    def __init__(self, window):
+        window.title("HW5")
+        #Right Frame
+##        rFrame = Frame(window)
+##        rFrame.pack(side=RIGHT)
+
+        self.filename = Entry(window)
+        self.filename.insert(0,'...')
+        self.filename.grid(row=0, column=1)
+        self.filename.config(state="readonly")
+
+        self.busy = Entry(window, state="readonly")
+        self.busy.grid(row=1,column=1)
+
+        self.consume = Entry(window, state="readonly")
+        self.consume.grid(row=2,column=1)
+
+        self.days = Entry(window, state="readonly")
+        self.days.grid(row=3, column=1)
+        #Left Frame
+        #lFrame = Frame(window)
+        #lFrame.pack(side=LEFT)
+
+        self.selectfile = Button(window, text="Select File", command=self.importCSV)
+        self.selectfile.grid(row=0,column=0,ipadx=60)
+
+        self.busyLab = Label(window, text="Busiest Day")
+        self.busyLab.grid(row=1,column=0)
+
+        self.consumeLab = Label(window, text="Most Time Consuming Activity")
+        self.consumeLab.grid(row=2,column=0)
+
+        self.daysLab = Label(window, text="Days Without Sleep")
+        self.daysLab.grid(row=3,column=0)
+
+        self.b = Button(window, text="Calculate!", command=self.calculate)
+        self.b.grid(row=4, columnspan=2, ipadx=120)
+    
+
+    def importCSV(self):
+        data = filedialog.askopenfilename()
+        self.dataList = []
+        self.f = open(data)
+        self.r = csv.reader(self.f)
+        for item in self.r:
+            for x in range(len(item)):
+                try:
+                    item[x]=int(item[x])
+                except:
+                    pass
+            self.dataList.append(item)
+        self.filename.config(state=NORMAL)
+        self.filename.insert(0,data)
+        self.filename.config(state="readonly")
+        return self.dataList
+        
+        
+    
+    def busiestDay(self):
+        aDict = {}
+        num = 0
+        for row in self.dataList:
+            num+=1
+        num = num//7
+        for row in range(len(self.dataList)):
+            count = 0
+            if row>0:
+                for x in self.dataList[row]:
+                    
+                    if type(x)==type(''):
+                        name = x
+                        if x not in aDict.keys():
+                            
+                            aDict[name]=0
+                    else:
+                        count+=x
+                
+                count = count/num
+                aDict[name]+=count
+        day = max(aDict, key=aDict.get)
+        self.busy.config(state=NORMAL)
+        self.busy.insert(0,str(day))
+        self.busy.config(state="readonly")
+                
+
+    def consumingActivity(self):
+        aDict = {}
+        for x in range(len(self.dataList[0])):
+            if x > 0:
+                aDict[self.dataList[0][x]]=0
+                for item in range(len(self.dataList[x])):
+                    if item > 0:
+                        aDict[self.dataList[0][x]]+=int(self.dataList[x][item])
+
+        activity = max(aDict.items())
+        activity = activity[0]
+        self.consume.config(state=NORMAL)
+        self.consume.insert(0,str(activity))
+        self.consume.config(state="readonly")
+                    
+    def sleeplessDays(self):
+        count = 0
+        for day in range(len(self.dataList)):
+            if day>0:
+                aNum = 0
+                for x in range(len(self.dataList[day])):
+                    if x > 0:
+                        aNum+=self.dataList[day][x]
+                if aNum>=24:
+                    count+=1
+        self.days.config(state=NORMAL)
+        self.days.insert(0,count)
+        self.days.config(state="readonly")                      
+            
+
+    def calculate(self):
+        self.days.config(state=NORMAL)
+        self.days.delete(0,END)
+        self.days.config(state="readonly")
+        self.consume.config(state=NORMAL)
+        self.consume.delete(0,END)
+        self.consume.config(state="readonly")
+        self.busy.config(state=NORMAL)
+        self.busy.delete(0,END)
+        self.busy.config(state="readonly")
+        self.busiestDay()
+        self.consumingActivity()
+        self.sleeplessDays()
+
+aWin = Tk()
+app = HW5(aWin)
+aWin.mainloop()
+
