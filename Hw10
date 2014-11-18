@@ -1,0 +1,232 @@
+from tkinter import *
+import xml.etree.ElementTree as etree
+
+class GUI:
+    def __init__(self, main):
+        self.f = Frame(main)
+        self.f.pack()
+        b = Button(self.f, text = "Choose File", command = self.clicked)
+        b.pack()
+
+        self.pitcherDict  = {}
+
+        self.pitcherList = []
+
+       
+    def clicked(self):
+        inFile = filedialog.askopenfilename()
+        
+        try:
+            self.tree = etree.parse(inFile)
+            messagebox.showinfo(title="Parse successful!", message="Press OK to save your output file.")
+            self.outFile = filedialog.asksaveasfilename()
+            l = Label(self.f, text="File successfully saved!")
+            l.pack()
+        except:
+            messagebox.showwarning(title="Parse failed!", message="File failed to be parsed, please try again.")
+
+        self.root = self.tree.getroot()
+
+        for game in self.root:
+            for inning in game:
+                for toporbot in inning:
+                    for action in toporbot:
+                        if action.tag == 'atbat':
+                            pitcher = action.attrib.get("pitcher", "N/A")
+
+                            if pitcher not in self.pitcherList:
+                                self.pitcherList.append(pitcher)
+
+        for pitcher in self.pitcherList:
+            self.pitcherDict[pitcher] = {'pitchType' : {'FA' : [0,0,0,[]],'SI' : [0,0,0,[]], 'FC' : [0,0,0,[]], 'IN' : [0,0,0,[]], 'FF' : [0,0,0,[]], 'FT': [0,0,0,[]], 'SL' : [0,0,0,[]], 'CH' : [0,0,0,[]], 'CU' : [0,0,0,[]], 'PO' : [0,0,0,[]], 'KC' : [0,0,0,[]]}}
+        self.parseGames()
+            
+    def parseGames(self):
+        for game in self.root:
+            for inning in game:
+                for toporbot in inning:
+                    for action in toporbot:
+                        if action.tag == 'atbat':
+                            self.parseAtBat(action)
+                            
+        self.writePitchers()
+
+        #writes the data to an xml
+        root = etree.Element("Pitchers")
+
+        self.pitcherList.sort()
+        
+        for pitcher in self.pitcherList:
+            pitcherRoot = etree.SubElement(root, "Pitcher", name=pitcher)
+            
+            for typePitch in self.pitcherDict[pitcher]['pitchType']:
+                if self.pitcherDict[pitcher]['pitchType'][typePitch][0] == 0:
+                    pass
+                else:
+                    pitchData = etree.SubElement(pitcherRoot, "PitchData", pitchType=typePitch)
+                    numPitch = etree.SubElement(pitchData, "NumPitched")
+                    numPitch.text = str(self.pitcherDict[pitcher]['pitchType'][typePitch][0])
+                    avgSpeed = etree.SubElement(pitchData, "AvgSpeed")
+                    avgSpeed.text = str(self.pitcherDict[pitcher]['pitchType'][typePitch][1])
+                    sToBRatio = etree.SubElement(pitchData, "StrikeToBallRatio")
+                    sToBRatio.text = str(self.pitcherDict[pitcher]['pitchType'][typePitch][2])
+            
+        tree = etree.ElementTree(root)
+        tree.write(self.outFile, "UTF-8")
+
+    def parseAtBat(self, atbat):
+        pitcher = atbat.attrib.get("pitcher", "N/A")      
+
+        pitchList = atbat.findall("pitch")
+
+        for pitch in pitchList:
+            #Contains if strike or ball, speed, and type of pitch
+            pitchType = pitch.attrib["pitch_type"]
+            speed = pitch.attrib["start_speed"]
+            call = pitch.attrib["type"]
+            
+            if call == "X" or call == "S":
+                call = "Strike"
+            else:
+                call = "Ball"
+        
+            #Checks for a vaild pitch speed
+            try:
+                speed = float(speed)
+                if pitchType == "FF":
+                    self.pitcherDict[pitcher]['pitchType']['FF'][0] +=1
+                    if call == "Strike":
+                        self.pitcherDict[pitcher]['pitchType']['FF'][1] +=1
+                    else:
+                        self.pitcherDict[pitcher]['pitchType']['FF'][2] +=1
+                    self.pitcherDict[pitcher]['pitchType']['FF'][3].append(speed)
+                    
+                elif pitchType == "FT":
+                    self.pitcherDict[pitcher]['pitchType']['FT'][0] +=1
+                    if call == "Strike":
+                        self.pitcherDict[pitcher]['pitchType']['FT'][1] +=1
+                    else:
+                        self.pitcherDict[pitcher]['pitchType']['FT'][2] +=1
+                    self.pitcherDict[pitcher]['pitchType']['FT'][3].append(speed)
+
+                elif pitchType == "FA":
+                    self.pitcherDict[pitcher]['pitchType']['FA'][0] +=1
+                    if call == "Strike":
+                        self.pitcherDict[pitcher]['pitchType']['FA'][1] +=1
+                    else:
+                        self.pitcherDict[pitcher]['pitchType']['FA'][2] +=1
+                    self.pitcherDict[pitcher]['pitchType']['FA'][3].append(speed)
+                    
+                elif pitchType == "SL":
+                    self.pitcherDict[pitcher]['pitchType']['SL'][0] +=1
+                    if call == "Strike":
+                        self.pitcherDict[pitcher]['pitchType']['SL'][1] +=1
+                    else:
+                        self.pitcherDict[pitcher]['pitchType']['SL'][2] +=1
+                    self.pitcherDict[pitcher]['pitchType']['SL'][3].append(speed)
+                    
+                elif pitchType == "CU":
+                    self.pitcherDict[pitcher]['pitchType']['CU'][0] +=1
+                    if call == "Strike":
+                        self.pitcherDict[pitcher]['pitchType']['CU'][1] +=1
+                    else:
+                        self.pitcherDict[pitcher]['pitchType']['CU'][2] +=1
+                    self.pitcherDict[pitcher]['pitchType']['CU'][3].append(speed)
+                    
+                elif pitchType == "KC":
+                    self.pitcherDict[pitcher]['pitchType']['KC'][0] +=1
+                    if call == "Strike":
+                        self.pitcherDict[pitcher]['pitchType']['KC'][1] +=1
+                    else:
+                        self.pitcherDict[pitcher]['pitchType']['KC'][2] +=1
+                    self.pitcherDict[pitcher]['pitchType']['KC'][3].append(speed)
+
+                elif pitchType == "IN":
+                    self.pitcherDict[pitcher]['pitchType']['IN'][0] +=1
+                    if call == "Strike":
+                        self.pitcherDict[pitcher]['pitchType']['IN'][1] +=1
+                    else:
+                        self.pitcherDict[pitcher]['pitchType']['IN'][2] +=1
+                    self.pitcherDict[pitcher]['pitchType']['IN'][3].append(speed)
+
+                elif pitchType == "FC":
+                    self.pitcherDict[pitcher]['pitchType']['FC'][0] +=1
+                    if call == "Strike":
+                        self.pitcherDict[pitcher]['pitchType']['FC'][1] +=1
+                    else:
+                        self.pitcherDict[pitcher]['pitchType']['FC'][2] +=1
+                    self.pitcherDict[pitcher]['pitchType']['FC'][3].append(speed)
+
+                elif pitchType == "SI":
+                    self.pitcherDict[pitcher]['pitchType']['SI'][0] +=1
+                    if call == "Strike":
+                        self.pitcherDict[pitcher]['pitchType']['SI'][1] +=1
+                    else:
+                        self.pitcherDict[pitcher]['pitchType']['SI'][2] +=1
+                    self.pitcherDict[pitcher]['pitchType']['SI'][3].append(speed)
+
+                elif pitchType == "PO":
+                    self.pitcherDict[pitcher]['pitchType']['PO'][0] +=1
+                    if call == "Strike":
+                        self.pitcherDict[pitcher]['pitchType']['PO'][1] +=1
+                    else:
+                        self.pitcherDict[pitcher]['pitchType']['PO'][2] +=1
+                    self.pitcherDict[pitcher]['pitchType']['PO'][3].append(speed)
+
+                elif pitchType == "FA":
+                    self.pitcherDict[pitcher]['pitchType']['FA'][0] +=1
+                    if call == "Strike":
+                        self.pitcherDict[pitcher]['pitchType']['FA'][1] +=1
+                    else:
+                        self.pitcherDict[pitcher]['pitchType']['FA'][2] +=1
+                    self.pitcherDict[pitcher]['pitchType']['FA'][3].append(speed)                
+                    
+                else:
+                    self.pitcherDict[pitcher]['pitchType']['CH'][0] +=1
+                    if call == "Strike":
+                        self.pitcherDict[pitcher]['pitchType']['CH'][1] +=1
+                    else:
+                        self.pitcherDict[pitcher]['pitchType']['CH'][2] +=1
+                    self.pitcherDict[pitcher]['pitchType']['CH'][3].append(speed)
+                    
+                
+            except:
+                pass
+
+    def writePitchers(self):        
+        for pitcher in self.pitcherDict:
+            for typepitch in self.pitcherDict[pitcher]['pitchType']:
+                #self.pitcherDict[pitcher]['pitchType'][typepitch] <--info about pitch
+                pitchList = self.pitcherDict[pitcher]['pitchType'][typepitch]
+                self.processPitches(pitchList, pitcher, typepitch)
+                    
+
+    def processPitches(self, pitchList, pitcher, typepitch):
+        #input : key=typeofpitch, value = [num of pitch thrown, strikes, balls, [speeds]]
+        #desired out put key=typeofpitch, value = (num of pitch thrown, avg speed, stobratio)
+        numOfPitch = self.pitcherDict[pitcher]['pitchType'][typepitch][0]
+        totalSpeed = 0
+        for speed in  self.pitcherDict[pitcher]['pitchType'][typepitch][3]:
+            totalSpeed += speed
+        lenOfSpeed = 1
+        if len(self.pitcherDict[pitcher]['pitchType'][typepitch][3]) != 0:
+            lenOfSpeed = len(self.pitcherDict[pitcher]['pitchType'][typepitch][3])
+        avgSpeed = totalSpeed/lenOfSpeed
+        strikes = self.pitcherDict[pitcher]['pitchType'][typepitch][1]
+        if self.pitcherDict[pitcher]['pitchType'][typepitch][2] == 0:
+            balls = 1
+        else:
+            balls = self.pitcherDict[pitcher]['pitchType'][typepitch][2]
+        sToB = strikes/balls
+        
+        self.pitcherDict[pitcher]['pitchType'][typepitch] = (numOfPitch, avgSpeed, sToB)
+
+
+        
+        
+
+main = Tk()
+app = GUI(main)
+main.mainloop()
+
+
