@@ -1,0 +1,651 @@
+from tkinter import *
+import urllib.request
+import pymysql
+import base64
+
+class GUI:
+    
+    def __init__(self, main):
+        self.LoginPage(main)
+
+    def LoginPage(self, main):
+        #Titles window
+        main.title("Login")
+
+        #Finds image
+        url = "http://www.cc.gatech.edu/classes/AY2015/cs2316_fall/codesamples/techlogo.gif"
+        u = urllib.request.urlopen(url)
+        myPic = u.read()
+        u.close()
+
+        #Creates image
+        b64_data = base64.encodebytes(myPic)
+        self.photo = PhotoImage(data=b64_data)
+
+        #Puts image in the GUI        
+        self.photoLabel = Label(main, image=self.photo)
+        self.photoLabel.grid(row = 0, column = 1, columnspan = 2)
+        
+        userLabel = Label(main, text = "Username")
+        userLabel.grid(row = 1, column = 0, sticky = E)
+
+        #Put the width at 46 instead of 30 to make GUI more aesthetically pleasing
+        self.logUserEntry = Entry(main, width = 46)
+        self.logUserEntry.grid(row = 1, column = 1, columnspan = 2)
+
+        passLabel = Label(main, text = "Password")
+        passLabel.grid(row = 2, column = 0, sticky = E)
+        
+        #Put the width at 46 instead of 30 to make GUI more aesthetically pleasing
+        self.logPassEntry = Entry(main, width = 46)
+        self.logPassEntry.grid(row = 2, column = 1, columnspan = 2)
+
+        regButton = Button(main, text = "Register", command = self.Register)
+        regButton.grid(row = 3, column = 1, sticky = E)
+
+        logButton = Button(main, text = "Login", command = self.LoginCheck)
+        logButton.grid(row = 3 , column = 2, sticky = E+W)
+
+        exitButton = Button(main, text = "Exit", command = main.destroy)
+        exitButton.grid(row = 3, column = 3)
+
+    def Register(self):
+        #Create the register window and bring it to the front
+        main.withdraw()
+        self.aWin = Toplevel()
+        self.aWin.deiconify()
+
+        #Titles window
+        self.aWin.title("Room Reservation New User Registration")
+
+        self.photoLabel = Label(self.aWin, image=self.photo)
+        self.photoLabel.grid(row = 0, column = 1, columnspan = 2)
+
+        lastLabel = Label(self.aWin, text = "Last Name")
+        lastLabel.grid(row = 1, column = 0, sticky = W)
+
+        #Put the width at 46 instead of 30 to make GUI more aesthetically pleasing
+        self.lastEntry = Entry(self.aWin, width = 46)
+        self.lastEntry.grid(row = 1, column = 1, columnspan = 2)
+        
+        userLabel = Label(self.aWin, text = "Username")
+        userLabel.grid(row = 2, column = 0, sticky = W)
+
+        #Put the width at 46 instead of 30 to make GUI more aesthetically pleasing
+        self.userEntry = Entry(self.aWin, width = 46)
+        self.userEntry.grid(row = 2, column = 1, columnspan = 2)
+
+        passLabel = Label(self.aWin, text = "Password")
+        passLabel.grid(row = 3, column = 0, sticky = W)
+
+        #Put the width at 46 instead of 30 to make GUI more aesthetically pleasing
+        self.passEntry = Entry(self.aWin, width = 46)
+        self.passEntry.grid(row = 3, column = 1, columnspan = 2)
+
+        confirmLabel = Label(self.aWin, text = "Confirm Password")
+        confirmLabel.grid(row = 4, column = 0, sticky = W)
+
+        #Put the width at 46 instead of 30 to make GUI more aesthetically pleasing
+        self.confirmEntry = Entry(self.aWin, width = 46)
+        self.confirmEntry.grid(row =4, column = 1, columnspan = 2)
+
+        cancelButton = Button(self.aWin, text = "Cancel", command = self.Cancel)
+        cancelButton.grid(row = 5, column = 2, sticky = E)
+
+        regButton = Button(self.aWin, text = "Register", command = self.RegisterNew)
+        regButton.grid(row = 5, column = 3)
+
+    def Cancel(self):
+        self.aWin.destroy()
+        main.deiconify()
+            
+    def Connect(self):
+        try:
+            db = pymysql.connect(
+                host="academic-mysql.cc.gatech.edu",
+                user="cs2316", db="cs2316db",
+                passwd="H1tp4Jct$")
+            return db
+        
+        except:
+            messagebox.showinfo(message = "Please check your Internet Connection.")
+
+    def RegisterNew(self):
+        #Checks if username already exists
+        db = self.Connect()
+        userName = self.userEntry.get()
+        search = """SELECT Username FROM ReservationUser"""
+        cSearch = db.cursor()
+        cSearch.execute(search)
+        searchList = []
+        passnum = 0
+        passup = 0
+        
+        for item in cSearch:
+            searchList.append(item[0].upper())
+
+        #Checks for numbers and upper case
+        for item in self.passEntry.get():
+            try:
+                int(item)
+                passnum += 1
+            except:
+                if item == item.upper():
+                    passup += 1               
+        
+        if userName.upper() in searchList:
+            messagebox.showinfo(message = "Username already exists, try another one.")
+            
+        elif len(userName) > 15:
+            messagebox.showinfo(message = "Username must be less than 15 characters.")
+
+        elif self.confirmEntry.get() != self.passEntry.get():
+            messagebox.showinfo(message = "Passwords don't match.")
+
+        elif passnum == 0 or passup == 0:
+            messagebox.showinfo(message = "Password needs at least one upper case letter and at least one number.")
+
+
+        #Else statement creats user
+        else:          
+            c = db.cursor()
+            sql = """INSERT INTO ReservationUser (Username, Password, LastName)
+                      VALUES(%s, %s, %s)"""
+            c.execute(sql, (userName, self.passEntry.get(), self.lastEntry.get()))
+            messagebox.showinfo(message = "Congrats, you've been registered.")
+            self.aWin.withdraw()
+            main.deiconify()
+            c.close()
+
+        cSearch.close()
+        db.commit()
+        db.close()
+
+    def LoginCheck(self):
+        #Checks if username already exists
+        self.db = self.Connect()
+        
+        userName = self.logUserEntry.get()
+        passWord = self.logPassEntry.get()
+
+        sqlUserPass = "SELECT Username,Password FROM ReservationUser"
+
+        cUserPass = self.db.cursor()
+        cUserPass.execute(sqlUserPass)
+        userPassList = []
+        for item in cUserPass:
+            userPassList.append((item[0].upper(), item[1]))
+            
+        if userName == "" or passWord == "":
+            m = messagebox.showinfo(message = "Username/password was unrecognizable, try again.")
+        elif (userName.upper(), passWord) in userPassList:
+            messagebox.showinfo(message = "You have successfully logged in.")
+            main.withdraw()
+            self.HomePage()
+            
+        #Shows message box
+        else:
+            m = messagebox.showinfo(message = "Username/password was unrecognizable, try again.")
+            
+        
+    def HomePage(self):
+        self.bwin = Toplevel()
+        self.bwin.title("Room Reservation Homepage")
+
+        #List holding this week's reservations
+        self.currentRes = []
+        c = self.db.cursor()
+        thisBetterWork = "SELECT * FROM RoomReservations WHERE ReservedBy=" + "'" + self.logUserEntry.get() + "'"
+        c.execute(thisBetterWork)
+        for x in c:
+            self.currentRes.append(x)
+        c.close()
+        
+        #Sets beginning of current reservations
+        initRow = 2
+
+        l = Label(self.bwin, text = "Welcome To GT Room Reservation System!", relief = RAISED)
+        l.grid(row = 0, column = 1, columnspan = 3)
+
+        currentLab = Label(self.bwin, text = "Current Reservations:", anchor = NE)
+        currentLab.grid(row = 2, column = 0)
+
+        self.resVar = StringVar()
+        self.resVar2 = StringVar()
+
+        if len(self.currentRes) == 0:
+            self.resVar.set("No Current Reservations")
+            currentE1 = Entry(self.bwin, textvariable = self.resVar, state = "readonly")
+            currentE1.grid(row = initRow, column = 1, columnspan = 4, sticky = E+W)
+
+        elif len(self.currentRes) > 0:
+            for x in range(len(self.currentRes)):
+                building = self.currentRes[x][0]
+                floor = self.currentRes[x][1]
+                room = self.currentRes[x][2]
+                day = self.currentRes[x][3]
+                time = self.currentRes[x][4]
+                aRes = "Room " + str(room) + " on " + building + " floor " + str(floor) + " is reserved for " + day + " at " + time + " hours."
+
+                if x == 0:
+                    self.resVar.set(aRes)
+                    currentE1 = Entry(self.bwin, textvariable = self.resVar, state = "readonly", width = 60)
+                    currentE1.grid(row = initRow, column = 1, columnspan = 4, sticky = E+W)
+                    initRow += 1
+                else:
+                    self.resVar2.set(aRes)
+                    currentE1 = Entry(self.bwin, textvariable = self.resVar2, state = "readonly", width = 60)
+                    currentE1.grid(row = initRow, column = 1, columnspan = 4, sticky = E+W)
+                    initRow += 1
+                    
+
+        newLab = Label(self.bwin, text = "Make New Reservations:")
+        newLab.grid(row = 4, column = 0)
+        
+        #Creates DAY Choices Radio Buttons 
+        dayFrame = Frame(self.bwin, bd = 2, relief = SUNKEN)
+        dayFrame.grid(row = 5, column = 0)
+
+        dayLab = Label(dayFrame, text = "Day Choices:", anchor = NE)
+        dayLab.grid(row = 0, column = 0)
+
+        self.dayVar = IntVar()
+        self.dayVar.set(0)
+
+        rbM = Radiobutton(dayFrame, text = "Monday", variable = self.dayVar, value = 1)
+        rbM.grid(row = 1, column = 0)
+
+        rbT = Radiobutton(dayFrame, text = "Tuesday", variable = self.dayVar, value = 2)
+        rbT.grid(row = 2, column = 0)
+
+        rbW = Radiobutton(dayFrame, text = "Wednesday", variable = self.dayVar, value = 3)
+        rbW.grid(row = 3, column = 0)
+
+        rbR = Radiobutton(dayFrame, text = "Thursday", variable = self.dayVar, value = 4)
+        rbR.grid(row = 4, column = 0)
+
+        rbF = Radiobutton(dayFrame, text = "Friday", variable = self.dayVar, value = 5)
+        rbF.grid(row = 5, column = 0)
+
+        #Creates TIME Choices Radio Buttons 
+        timeFrame = Frame(self.bwin, bd = 2, relief = SUNKEN)
+        timeFrame.grid(row = 5, column = 1)
+
+        timeLab = Label(timeFrame, text = "Time Choices:", anchor = NE)
+        timeLab.grid(row = 0, column = 0)
+
+        self.timeVar = IntVar()
+        self.timeVar.set(0)
+        
+        rbMorn = Radiobutton(timeFrame, text = "Morning", variable = self.timeVar, value = 1)
+        rbMorn.grid(row = 1, column = 0)
+
+        rbAfter = Radiobutton(timeFrame, text = "Afternoon", variable = self.timeVar, value = 2)
+        rbAfter.grid(row = 2, column = 0)
+
+        rbEve = Radiobutton(timeFrame, text = "Evening", variable = self.timeVar, value = 3)
+        rbEve.grid(row = 3, column = 0)
+
+        rbNite = Radiobutton(timeFrame, text = "Night", variable = self.timeVar, value = 4)
+        rbNite.grid(row = 4, column = 0)
+
+        #Creates BUILDING Choices Radio Buttons 
+        buildFrame = Frame(self.bwin, bd = 2, relief = SUNKEN)
+        buildFrame.grid(row = 5, column = 2)
+
+        buildLab = Label(buildFrame, text = "Building Choices:", anchor = NE)
+        buildLab.grid(row = 0, column = 0)
+
+        self.buildVar = IntVar()
+        self.buildVar.set(0)
+
+        rbC = Radiobutton(buildFrame, text = "CULC", variable = self.buildVar, value = 1)
+        rbC.grid(row = 1, column = 0)
+
+        rbK = Radiobutton(buildFrame, text = "Klaus", variable = self.buildVar, value = 2)
+        rbK.grid(row = 2, column = 0)
+
+        #Creates FLOOR Choices Radio Buttons 
+        floorFrame = Frame(self.bwin, bd = 2, relief = SUNKEN)
+        floorFrame.grid(row = 5, column = 3)
+
+        floorLab = Label(floorFrame, text = "Floor Choices:", anchor = NE)
+        floorLab.grid(row = 0, column = 0)
+
+        self.floorVar = IntVar()
+        self.floorVar.set(0)
+
+        rbF1 = Radiobutton(floorFrame, text = "1", variable = self.floorVar, value = 1)
+        rbF1.grid(row = 1, column = 0)
+
+        rbF2 = Radiobutton(floorFrame, text = "2", variable = self.floorVar, value = 2)
+        rbF2.grid(row = 2, column = 0)
+
+        rbF3 = Radiobutton(floorFrame, text = "3", variable = self.floorVar, value = 3)
+        rbF3.grid(row = 3, column = 0)
+
+        rbF4 = Radiobutton(floorFrame, text = "4", variable = self.floorVar, value = 4)
+        rbF4.grid(row = 4, column = 0)
+
+        #Creates ROOM Choices Radio Buttons 
+        roomFrame = Frame(self.bwin, bd = 2, relief = SUNKEN)
+        roomFrame.grid(row = 5, column = 4)
+
+        roomLab = Label(roomFrame, text = "Room Choices:")
+        roomLab.grid(row = 0, column = 0, columnspan = 2)
+
+        self.roomVar = IntVar()
+        self.roomVar.set(0)
+
+        rb1 = Radiobutton(roomFrame, text = "1", variable = self.roomVar, value = 1)
+        rb1.grid(row = 1, column = 0)
+
+        rb2 = Radiobutton(roomFrame, text = "2", variable = self.roomVar, value = 2)
+        rb2.grid(row = 2, column = 0)
+
+        rb3 = Radiobutton(roomFrame, text = "3", variable = self.roomVar, value = 3)
+        rb3.grid(row = 3, column = 0)
+
+        rb4 = Radiobutton(roomFrame, text = "4", variable = self.roomVar, value = 4)
+        rb4.grid(row = 4, column = 0)
+
+        rb5 = Radiobutton(roomFrame, text = "5", variable = self.roomVar, value = 5)
+        rb5.grid(row = 5, column = 0)
+
+        rb6 = Radiobutton(roomFrame, text = "6", variable = self.roomVar, value = 6)
+        rb6.grid(row = 1, column = 1)
+
+        rb7 = Radiobutton(roomFrame, text = "7", variable = self.roomVar, value = 7)
+        rb7.grid(row = 2, column = 1)
+
+        rb8 = Radiobutton(roomFrame, text = "8", variable = self.roomVar, value = 8)
+        rb8.grid(row = 3, column = 1)
+
+        rb9 = Radiobutton(roomFrame, text = "9", variable = self.roomVar, value = 9)
+        rb9.grid(row = 4, column = 1)
+
+        rb10 = Radiobutton(roomFrame, text = "10", variable = self.roomVar, value = 10)
+        rb10.grid(row = 5, column = 1)
+
+        #Creates bottom row of buttons
+        cancelB = Button(self.bwin, text = "Cancel All Reservations", command = self.cancelReservations)
+        cancelB.grid(row = 6, column = 0, sticky = E+W)
+
+        checkB = Button(self.bwin, text = "Check Available Options", command = self.availableReservations)
+        checkB.grid(row = 6, column = 1, columnspan = 2, sticky = E+W)
+
+        statsB = Button(self.bwin, text = "Stats", command = self.stats)
+        statsB.grid(row = 6, column = 3, sticky = E+W)
+
+        logOutB = Button(self.bwin, text = "Logout", command = self.logout)
+        logOutB.grid(row = 6, column = 4, sticky = E+W)
+
+    def availableReservations(self):
+        cursor = self.db.cursor()
+        sql = "SELECT * FROM RoomReservations"
+        cursor.execute(sql)
+        ##for item in cursor:
+         ##   print(item)
+        cursor.close()
+        
+        if self.dayVar.get() == 0 or self.timeVar.get() == 0 or self.buildVar.get() == 0 or self.floorVar.get() == 0 or self.roomVar.get() == 0:
+            messagebox.showwarning(title = "Search Failure", message = "Please choose a valid option from each category")
+
+        elif len(self.currentRes) > 1:
+            messagebox.showinfo(title = "Error", message = "You can only make 2 reservations per week. Try again next week.")
+        
+        else:
+            if self.buildVar.get() == 1:
+                self.building = "'CULC'"
+            else:
+                self.building = "'Klaus'"
+
+            if self.dayVar.get() == 1:
+                self.day = "'Monday'"
+            elif self.dayVar.get() == 2:
+                self.day = "'Tuesday'"
+            elif self.dayVar.get() == 3:
+                self.day = "'Wednesday'"
+            elif self.dayVar.get() == 4:
+                self.day = "'Thursday'"
+            else:
+                self.day = "'Friday'"
+
+            if self.timeVar.get() == 1:
+                self.time = ["'8:00'","'9:00'","'10:00'","'11:00'"]
+            elif self.timeVar.get() == 2:
+                self.time = ["'12:00'","'13:00'","'14:00'","'15:00'"]
+            elif self.timeVar.get() == 3:
+                self.time = ["'16:00'","'17:00'","'18:00'","'19:00'"]
+            else:
+                self.time = ["'20:00'","'21:00'","'22:00'","'23:00'"]
+
+            self.room = self.roomVar.get()
+            self.floor = self.floorVar.get()
+
+            availList = []
+            notAvailList = []
+
+            notAvailCount = 0
+            
+            for item in self.time:
+                sql = "SELECT * FROM RoomReservations WHERE "
+                sql += "Building=" + self.building + " and Floor=" + str(self.floor) + " and RoomNo=" + str(self.room) + " and Day=" + self.day + " and Time=" + item + ";"
+                cursor = self.db.cursor()
+                cursor.execute(sql)
+                for x in cursor:
+                    notAvailList.append(x)
+                if len(notAvailList) == notAvailCount:
+                    availList.append((self.building[1:len(self.building)-1], self.floor, self.room, self.day[1:len(self.day)-1], item[1:len(item)-1]))
+                else:
+                    notAvailCount += 1
+                
+            #Creates the window
+            self.cwin = Toplevel()
+            self.cwin.title("Available Rooms")
+
+            bL = Label(self.cwin, text = "Building", relief = RAISED).grid(row = 0, column = 0)
+            fL = Label(self.cwin, text = "Floor", relief = RAISED).grid(row = 0, column = 1)
+            rL = Label(self.cwin, text = "Room", relief = RAISED).grid(row = 0, column = 2)
+            dL = Label(self.cwin, text = "Room", relief = RAISED).grid(row = 0, column = 3, sticky = E+W)
+            tL = Label(self.cwin, text = "Time", relief = RAISED).grid(row = 0, column = 4, sticky = E+W)
+            sL = Label(self.cwin, text = "Select", relief = RAISED).grid(row = 0, column = 5, sticky = E+W)
+
+            #Room Reservations Available Labels
+            initRow = 1
+            initCol = 0
+            initVal = 0
+            self.rbVar = IntVar()
+            self.rbVar.set(10)
+            
+            for item in availList:
+                for x in item:
+                    l = Label(self.cwin, text = x).grid(row = initRow, column = initCol)
+                    initCol += 1
+                rb = Radiobutton(self.cwin, variable = self.rbVar, value = initVal)
+                rb.grid(row = initRow, column = initCol)
+                initVal += 1
+                initCol = 0
+                initRow += 1
+            
+            b1 = Button(self.cwin, text = "Submit Reservation", command = self.makeReservation)
+            b1.grid(row = 5, column = 3, columnspan = 2)
+            b2 = Button(self.cwin, text = "Cancel", command = self.cancel)
+            b2.grid(row = 5, column = 5)
+            cursor.close()
+
+    def cancel(self):
+        self.cwin.destroy()
+        self.bwin.deiconify()
+            
+    def makeReservation(self):
+        if self.rbVar.get() == 10:
+            messagebox.showwarning(title="Invalid", message="You must select a reservation to submit.")
+        else:
+            cursor = self.db.cursor()
+            insertSql = "INSERT INTO RoomReservations VALUES (" + self.building + ", " + str(self.floor) + ", " + str(self.room) + ", " + self.day
+            insertSql = insertSql + ", " + self.time[self.rbVar.get()] + ", '" + self.logUserEntry.get() + "')"
+            cursor.execute(insertSql)
+            cursor.close()
+            
+            cursorNew = self.db.cursor()
+            theSql = "SELECT * FROM RoomReservations WHERE ReservedBy=" + "'" + self.logUserEntry.get() + "' and RoomNo=" + str(self.room) + " and Time=" + self.time[self.rbVar.get()]
+            theSql = theSql + " and Floor=" + str(self.floor)
+            cursorNew.execute(theSql)
+            
+            for thing in cursorNew:
+                #Adds res to table and updates by recalling the HomePage()
+                aStr = "Room " + str(self.room) + " on " + self.building + " floor " + str(self.floor) + " is reserved for " + self.day + " at " + self.time[self.rbVar.get()]  + " hours."
+                if len(self.currentRes) == 0:
+                    self.resVar.set(aStr)
+                    
+                elif len(self.currentRes) > 0:
+                    self.resVar2.set(aStr)
+
+                self.currentRes.append(thing)
+
+            cursorNew.close()
+
+            self.bwin.destroy()
+            self.HomePage()
+
+            curs = self.db.cursor()
+            bStr = "UPDATE ReservationUser SET NumberOfReservations=" + str(len(self.currentRes)) + " WHERE Username=" + "'" + str(self.logUserEntry.get()) + "'" 
+            curs.execute(bStr)
+            curs.close()
+
+            c = self.db.cursor()
+            c.execute("SELECT * FROM ReservationUser")
+            for item in c:
+                c.close()
+                         
+            c2 = self.db.cursor()
+            c2.execute("SELECT * FROM RoomReservations")
+            for item in c2:
+                c2.close()
+
+            #Messagebox shown upon successfulling making res
+            messagebox.showinfo(title="Reservation Completion", message="Congratulations! You have reserved your room. Click OK to go back to Homepage.")
+
+            self.cwin.destroy()
+            self.bwin.deiconify()
+
+    def cancelReservations(self):
+        if len(self.currentRes) > 0:
+            #SQL Statements
+            deleteRes = "DELETE FROM RoomReservations WHERE ReservedBy=" + "'" + self.logUserEntry.get() + "'"
+            deleteNumOfRes = "UPDATE ReservationUser SET NumberOfReservations=0 WHERE Username=" + "'" + self.logUserEntry.get() + "'"
+
+            #Cursors executing above statements
+            c3 = self.db.cursor()
+            c3.execute(deleteRes)
+            c3.close()
+
+            c4 = self.db.cursor()
+            c4.execute(deleteNumOfRes)
+            c4.close()
+        
+            #Messagebox shown upon successfulling cancelling res
+            messagebox.showinfo(title="Cancellation Completion", message="Congratulations! You have cancelled your previous reservation(s).")
+
+            self.bwin.destroy()
+            self.HomePage()
+            
+        else:
+            #Messagebox shown upon failing to cancel res
+            messagebox.showwarning(title="Error", message="There are no currenet reservations to cancel")
+
+        
+    def stats(self):
+        self.bwin.withdraw()
+        self.dwin = Toplevel()
+        self.dwin.title("Statistics")
+
+        #Labels
+        l1 = Label(self.dwin, text = "The average number of reservations per person is:")
+        l1.grid(row = 0, column = 0)
+
+        l2 = Label(self.dwin, text = "The busiest building:")
+        l2.grid(row = 1, column =0)
+        
+        
+        #Text vars for entries
+        avgNum = StringVar()
+        busyBuild = StringVar()
+
+        #Entries
+        e1 = Entry(self.dwin, textvariable = avgNum, state = "readonly", width = 50)
+        e1.grid(row = 0, column = 1)
+
+        e2 = Entry(self.dwin, textvariable = busyBuild, state = "readonly", width = 50)
+        e2.grid(row = 1, column = 1)
+
+        #Back button
+        b1 = Button(self.dwin, text = "Back", command = self.back)
+        b1.grid(row = 2, column = 1, sticky = E)
+
+        #Finds avg num
+        totalRes = []
+        totalResC = self.db.cursor()
+        totalResC.execute("SELECT * FROM RoomReservations")
+        for item in totalResC:
+            totalRes.append(item)
+        totalRes = len(totalRes)
+        totalResC.close()
+
+        totalUser = []
+        totalUserC = self.db.cursor()
+        totalUserC.execute("SELECT DISTINCT ReservedBy FROM RoomReservations")
+        for item in totalUserC:
+            totalUser.append(item)
+        totalUser = len(totalUser)
+        totalUserC.close()
+
+        theAVG = totalRes/totalUser
+        avgNum.set(str(theAVG))
+
+        #Finds Busiest Building
+        culc = []
+        culcC = self.db.cursor()
+        culcC.execute("SELECT * FROM RoomReservations WHERE Building='CULC'")
+        for item in culcC:
+            culc.append(item)
+        culc = len(culc)
+        culcC.close()
+
+        klaus = []
+        klausC = self.db.cursor()
+        klausC.execute("SELECT * FROM RoomReservations WHERE Building='Klaus'")
+        for item in klausC:
+            klaus.append(item)
+        klaus = len(klaus)
+        klausC.close()
+
+        if klaus > culc:
+            num = klaus - culc
+            aStr = "Klaus is busy with " + str(num) + " more reservations so far."
+            busyBuild.set(aStr)
+
+        elif culc > klaus:
+            num = culc - klaus
+            aStr = "CULC is busy with " + str(num) + " more reservations so far."
+            busyBuild.set(aStr)
+
+        else:
+            aStr = "Both are busy with " + str(klaus) + " reservations so far."
+            busyBuild.set(aStr)
+        
+    def back(self):
+        self.dwin.destroy()
+        self.bwin.deiconify()
+    
+    def logout(self):
+        self.bwin.destroy()
+        main.deiconify()
+        self.logUserEntry.delete(0, END)
+        self.logPassEntry.delete(0, END)
+        
+main = Tk()
+app = GUI(main)
+main.mainloop()
+
