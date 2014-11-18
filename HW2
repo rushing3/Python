@@ -1,0 +1,203 @@
+from math import *
+import turtle
+
+def countLetter(aString, aLetter):
+    count = 0
+    for x in aString:
+        if x==aLetter:
+            count+=1
+    print("The letter", aLetter,"occurs", count,"time(s).")
+
+def gradeReplacement(gradeList):
+    low = min(gradeList)
+    aList = []
+    for x in gradeList:
+        if x!=low:
+            aList.append(x)
+    secondLow = min(aList)
+    aList.append(secondLow)
+    avg = float(sum(aList))/len(aList)
+    return avg,aList
+
+def findAvg(aList):
+    total = 0
+    count = 0
+    for x in aList:
+        if type(x)==int or type(x)==float:
+            total+=x
+            count+=1
+    avg = total/count
+    return avg
+
+def timeValueMoney(aList, intRate):
+    r = intRate
+    prd = 1
+    total = 0
+    for item in aList:
+        cash = item
+        val = cash/((1+r)**prd)
+        prd = prd + 1.0
+        total+=val
+    return format(total, '.2f')
+
+def numHourglass(aNum):
+    orgNum = aNum
+    count= 2*aNum-1
+    while count>=aNum:
+        aVal = str(aNum)*count
+        spaces = ' '*(orgNum-aNum)
+        print(spaces+aVal)
+        aNum = aNum - 1
+        count= 2*aNum-1
+    aNum = aNum + 1
+    count2= 2*orgNum-1
+    while count<count2:
+        aNum = aNum + 1
+        count= 2*aNum-1
+        aVal = str(aNum)*count
+        spaces = ' '*(orgNum-aNum)
+        print(spaces+aVal)
+
+def gpaCalculator(gradesList, hoursList):
+    total = 0
+    for x in range(len(gradesList)):
+        if gradesList[x]>=90:
+            pts = 4
+        elif gradesList[x]>80 and gradesList[x]<90:
+            pts = 3
+        elif gradesList[x]>70 and gradesList[x]<80:
+            pts = 2
+        elif gradesList[x]>60 and gradesList[x]<70:
+            pts = 1
+        else:
+            pts = 0
+        weight = pts*hoursList[x]
+        total+=weight
+    hours = sum(hoursList)
+    gpa = float(total)/hours
+    return gpa
+    
+def nutrition(aList, aNum):
+    protein = 0
+    calories = 0
+    for x in aList:
+        calories = calories + x[0]
+        protein = protein + x[1]
+    print(calories, protein)
+    if calories<=2500 and protein>=(aNum/2):
+        print("Nice! You consumed", protein,"grams of protein and still have", calories,"calories left!")
+    elif calories<=2500 and protein<=(aNum//2):
+        print("Sorry, you still need to eat",(aNum/2)-protein,"grams of protein, and have already consumed", calories,"calories.")
+    elif calories>=2500 and protein>=(aNum/2):
+        print("Sorry, you ate", protein,"grams of protein, but consummed",calories-2500,"too many calories.")
+    elif calories>=2500 and protein<=(aNum//2):
+        print("Sorry, you still need to eat",(aNum/2)-protein,"grams of protein, but consumed",calories-2500,"too many calories.")
+
+def clockTurtle(clockHour,aNum):
+    win = turtle.Screen()
+    one = turtle.Turtle()
+    two = turtle.Turtle()
+    three = turtle.Turtle()
+    four = turtle.Turtle()
+    five = turtle.Turtle()
+    six = turtle.Turtle()
+    seven = turtle.Turtle()
+    eight = turtle.Turtle()
+    nine = turtle.Turtle()
+    ten = turtle.Turtle()
+    eleven = turtle.Turtle()
+    twelve = turtle.Turtle()
+
+    def penup():
+        one.penup()
+        two.penup()
+        three.penup()
+        four.penup()
+        five.penup()
+        six.penup()
+        seven.penup()
+        eight.penup()
+        nine.penup()
+        ten.penup()
+        eleven.penup()
+
+    def start():
+        twelve.shape('turtle')
+        twelve.left(90)
+        twelve.forward(aNum//2)
+        one.shape('turtle')
+        one.left(60)
+        one.forward(aNum//2)
+        two.shape('turtle')
+        two.left(30)
+        two.forward(aNum//2)
+        three.shape('turtle')
+        three.forward(aNum//2)
+        four.shape('turtle')
+        four.right(30)
+        four.forward(aNum//2)
+        five.shape('turtle')
+        five.right(60)
+        five.forward(aNum//2)
+        six.shape('turtle')
+        six.right(90)
+        six.forward(aNum//2)
+        seven.shape('turtle')
+        seven.right(120)
+        seven.forward(aNum//2)
+        eight.shape('turtle')
+        eight.right(150)
+        eight.forward(aNum//2)
+        nine.shape('turtle')
+        nine.right(180)
+        nine.forward(aNum//2)
+        ten.shape('turtle')
+        ten.right(210)
+        ten.forward(aNum//2)
+        eleven.shape('turtle')
+        eleven.right(240)
+        eleven.forward(aNum//2)
+        
+    def move():
+        twelve.forward(aNum//2)
+        one.forward(aNum//2)
+        two.forward(aNum//2)
+        three.forward(aNum//2)
+        four.forward(aNum//2)
+        five.forward(aNum//2)
+        six.forward(aNum//2)
+        seven.forward(aNum//2)
+        eight.forward(aNum//2)
+        nine.forward(aNum//2)
+        ten.forward(aNum//2)
+        eleven.forward(aNum//2)
+
+    def pendown():   
+        if clockHour==1:
+            one.pendown()
+        elif clockHour==2:
+            two.pendown()
+        elif clockHour==3:
+            three.pendown()
+        elif clockHour==4:
+            four.pendown()
+        elif clockHour==5:
+            five.pendown()
+        elif clockHour==6:
+            six.pendown()
+        elif clockHour==7:
+            seven.pendown()
+        elif clockHour==8:
+            eight.pendown()
+        elif clockHour==9:
+            nine.pendown()
+        elif clockHour==10:
+            ten.pendown()
+        elif clockHour==11:
+            eleven.pendown()
+
+    penup()
+    pendown()
+    start()
+    penup()
+    move()
