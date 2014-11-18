@@ -1,0 +1,233 @@
+import time
+from datetime import *
+
+def worldTime():
+    cityUser = input("Select a city: New York, Tokyo, London, Rome, Taipei, Los Angeles.")
+    cityUser = cityUser.upper()
+    time = datetime.now()
+    if cityUser=="NEW YORK":
+        intList = []
+        hour = time.strftime("%I")
+        if hour!="12" and hour!="11":
+            hour = hour[1]
+        minute = time.strftime("%M")
+        ampm = time.strftime(" %p")
+        local = hour+":"+minute+ampm
+        y = time.strftime("%Y")
+        m = time.strftime("%m")
+        d = time.strftime("%d")
+        date = y+"-"+m+"-"+d
+        print("The current time in", cityUser.capitalize()," is", local," and the date is", date)
+        y1 = int(y[0])
+        y2 = int(y[1])
+        y3 = int(y[2])
+        y4 = int(y[3])
+        intList = [int(hour), int(minute), y1, y2, y3, y4, int(m), int(d)]
+        return intList
+
+    if cityUser=="TOKYO":
+        intList = []
+        timedif = timedelta(hours=13)
+        time = time + timedif
+        hour = time.strftime("%I")
+        if hour!="12" and hour!="11":
+            hour = hour[1]
+        minute = time.strftime("%M")
+        ampm = time.strftime(" %p")
+        local = hour+":"+minute+ampm
+        y = time.strftime("%Y")
+        m = time.strftime("%m")
+        d = time.strftime("%d")
+        date = y+"-"+m+"-"+d
+        print("The current time in", cityUser.capitalize()," is", local," and the date is", date)
+        y1 = int(y[0])
+        y2 = int(y[1])
+        y3 = int(y[2])
+        y4 = int(y[3])
+        intList = [int(hour), int(minute), y1, y2, y3, y4, int(m), int(d)]
+        return intList
+
+    if cityUser=="LONDON":
+        intList = []
+        timedif = timedelta(hours=5)
+        time = time + timedif
+        hour = time.strftime("%I")
+        if hour!="12" and hour!="11":
+            hour = hour[1]
+        minute = time.strftime("%M")
+        ampm = time.strftime(" %p")
+        local = hour+":"+minute+ampm
+        y = time.strftime("%Y")
+        m = time.strftime("%m")
+        d = time.strftime("%d")
+        date = y+"-"+m+"-"+d
+        print("The current time in", cityUser.capitalize()," is", local," and the date is", date)
+        y1 = int(y[0])
+        y2 = int(y[1])
+        y3 = int(y[2])
+        y4 = int(y[3])
+        intList = [int(hour), int(minute), y1, y2, y3, y4, int(m), int(d)]
+        return intList
+
+    if cityUser=="ROME":
+        intList = []
+        timedif = timedelta(hours=6)
+        time = time + timedif
+        hour = time.strftime("%I")
+        if hour!="12" and hour!="11":
+            hour = hour[1]
+        minute = time.strftime("%M")
+        ampm = time.strftime(" %p")
+        local = hour+":"+minute+ampm
+        y = time.strftime("%Y")
+        m = time.strftime("%m")
+        d = time.strftime("%d")
+        date = y+"-"+m+"-"+d
+        print("The current time in", cityUser.capitalize()," is", local," and the date is", date)
+        y1 = int(y[0])
+        y2 = int(y[1])
+        y3 = int(y[2])
+        y4 = int(y[3])
+        intList = [int(hour), int(minute), y1, y2, y3, y4, int(m), int(d)]
+        return intList
+
+    if cityUser=="TAIPEI":
+        intList = []
+        timedif = timedelta(hours=12)
+        time = time + timedif
+        hour = time.strftime("%I")
+        if hour!="12" and hour!="11":
+            hour = hour[1]
+        minute = time.strftime("%M")
+        ampm = time.strftime(" %p")
+        local = hour+":"+minute+ampm
+        y = time.strftime("%Y")
+        m = time.strftime("%m")
+        d = time.strftime("%d")
+        date = y+"-"+m+"-"+d
+        print("The current time in", cityUser.capitalize()," is", local," and the date is", date)
+        y1 = int(y[0])
+        y2 = int(y[1])
+        y3 = int(y[2])
+        y4 = int(y[3])
+        intList = [int(hour), int(minute), y1, y2, y3, y4, int(m), int(d)]
+        return intList
+
+    if cityUser=="LOS ANGELES":
+        intList = []
+        timedif = timedelta(hours=-3)
+        time = time + timedif
+        hour = time.strftime("%I")
+        if hour!="12" and hour!="11":
+            hour = hour[1]
+        minute = time.strftime("%M")
+        ampm = time.strftime(" %p")
+        local = hour+":"+minute+ampm
+        y = time.strftime("%Y")
+        m = time.strftime("%m")
+        d = time.strftime("%d")
+        date = y+"-"+m+"-"+d
+        print("The current time in", cityUser.capitalize()," is", local," and the date is", date)
+        y1 = int(y[0])
+        y2 = int(y[1])
+        y3 = int(y[2])
+        y4 = int(y[3])
+        intList = [int(hour), int(minute), y1, y2, y3, y4, int(m), int(d)]
+        return intList
+        
+def beyonce():
+    time = datetime.now()
+    name = input("What is your name?")
+    name = name.upper()
+    bday = input("What is your birthdate?")
+    gender = input("Do you identify as male, female, or other?")
+    gender = gender.upper()
+    year = time.strftime("%Y")
+    month = time.strftime("%m")
+    day = time.strftime("%d")
+    bmonth = bday[0]+bday[1]
+    birthday = bday[3]+bday[4]
+    byear = bday[-4]+bday[-3]+bday[-2]+bday[-1]
+    yeardif = (((int(year)-int(byear))))
+    monthdif = (int(month)-(int(bmonth)))
+    daydif = (int(day)-int(birthday))
+    age = (yeardif*365+monthdif*30+daydif)//365
+    if gender=='MALE' and age>=21:
+        count = 0
+        newname = ''
+        for x in name:
+            newname+=x
+            if x !='A' and x !='E' and x !='I' and x !='O' and x !='U':
+                count+=1
+                if count==2:
+                    newname+="z"
+                    newname = newname.capitalize()
+                    print("I got 99 problems, but being", newname,"ain't one!")
+                    return newname
+                
+    elif gender=='FEMALE' and age>=21:
+        count = 0
+        newname = ''
+        for x in name:
+            newname+=x
+            if x !='A' and x !='E' and x !='I' and x !='O' and x !='U':
+                count+=1
+                if count==2:
+                    newname+="yonce"
+                    newname = newname.capitalize()
+                    print("If you like it then you shoulda put", newname,"on it!")
+                    return newname
+
+    elif gender=='OTHER' or age<=21:
+        name = "Kanye"
+        print("I had a dream Kanye could find his way to heaven.")
+        return name
+
+
+def personalityTest():
+    aList=['ambitious','rigidly organized','impatient','on-time','high-stress','fast','competitive']
+    bList=['content','relatively disorganized','patient','late','low-stress','slow','easy going']
+    typA = 0
+    typB = 0
+    for x in range(len(aList)):
+        aStr = "Would you describe yourself as"+" "+aList[x]+" "+"or"+" "+bList[x]+" "+"?"
+        userInput = input(aStr)
+        userInput = userInput.upper()
+        if userInput== aList[x].upper():
+            typA+=1
+        elif userInput== bList[x].upper():
+            typB+=1
+    percentA = (typA)/(len(aList))*100
+    percentB = (typB)/(len(bList))*100
+    if percentA>percentB:
+        personality="A"
+        print("You are",int(percentA),"% Type A and", int(percentB),"% Type B. Overall, you have a Type",personality,"personality.")
+        return personality
+    elif percentB>percentA:
+        personality="B"
+        print("You are",(percentA),"% Type A and", int(percentB),"% Type B. Overall, you have a Type",personality,"personality.")
+        return personality
+
+
+def passwordCreator():
+    world = worldTime()
+    celeb = beyonce()
+    celeb = celeb.lower()
+    person = personalityTest()
+    count = 0
+    trial=""
+    new=""
+    if person=='A':
+        for x in celeb:
+            trial = trial + str(chr(ord(x)+world[count]))
+            count+=1
+        for x in world[count:]:
+            trial+=str(x)
+    if person=='B':
+        for x in celeb:
+            trial = trial + str(chr(ord(x)-world[count]))
+            count+=1
+        for x in world[count:]:
+            trial+=str(x)
+    print(world, celeb, person,trial)
+
