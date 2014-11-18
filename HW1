@@ -1,0 +1,289 @@
+#for pi
+from math import *
+#for turtles
+import turtle
+
+#GnToFbf
+
+def GnToFbf():
+    gn = input("How many Giraffe's Necks (Gn) are there?")
+    fbf = float(gn)*(70/3600)
+    print("That is", fbf,"Football Fields (Fbf)")
+
+#coneVolume
+
+def coneVolume():
+    height = input("What is the height of your cone?")
+    radius = input("What is the radius of the base of your cone?")
+    units = input("What are the units of measurement that you are using?")
+    volume = (1/3)*(pi)*((float(radius))**2)*float(height)
+    print("Volume of your cone is", volume, units,"-cubed")
+
+#footballScore
+
+def footballScore():
+    score = input("What was the team's score?")
+    if score==3:
+        print("One fieldgoal")
+    if score>=6:
+        tds = (int(score))//6
+        score = int(score)-(6*tds)
+        fgs = (int(score))//3
+        score = int(score)-(3*fgs)
+        twopts = (int(score))//2
+        score = int(score)-(2*twopts)
+        onept = (int(score))//1
+        print(tds, "touchdowns",fgs, "fieldgoals",twopts, "two-point conversions",onept,"one-point conversion")
+    else:        
+        print("That is not a valid score in American Football.")
+
+#bodyMassIndex
+
+def bodyMassIndex():
+    weight = input("What is your weight in pounds?")
+    height = input("What is your height in inches?")
+    bmi = (float(weight)/float(height**2))*703
+    print("Your bmi is", format(bmi, '.1f'))
+
+#calcDistance
+
+def calcDistance(x1,y1,x2,y2):
+    d = sqrt((x2-x1)**2+(y2-y1)**2)
+    return d
+
+#makeBikes
+
+def makeBikes(wheels, frames, links):
+    bikewheels = wheels/2
+    bikeframes = frames
+    bikelinks = links/50
+    bikes = min(bikewheels,bikeframes,bikelinks)
+    return bikes
+
+#drawSkyline
+
+def drawSkyline():
+    win = turtle.Screen()
+    win.bgcolor("BlanchedAlmond")
+    alex = turtle.Turtle()
+    alex.speed(10)
+    alex.penup()
+    alex.setposition(-450,-200)
+    alex.pendown()
+    alex.fillcolor("Black")
+    #twins
+    def twins():
+        alex.left(90)
+        alex.forward(550)
+        alex.right(90)
+        alex.forward(50)
+        alex.right(90)
+        alex.forward(550)
+        alex.left(90)
+        alex.forward(20)
+        
+        alex.left(90)
+        alex.forward(550)
+        alex.right(90)
+        alex.forward(22.5)
+        alex.left(90)
+        alex.forward(40)
+        alex.right(90)
+        alex.forward(5)
+        alex.right(90)
+        alex.forward(40)
+        alex.left(90)
+        alex.forward(22.5)
+        alex.right(90)
+        alex.forward(550)
+        alex.left(90)
+        alex.forward(20)
+            
+    #needle
+    def needle():
+        alex.forward(30)
+        alex.left(80)
+        alex.forward(160)
+        alex.left(20)
+        alex.forward(160)
+        alex.left(80)
+        alex.forward(20)
+        alex.right(100)
+        alex.forward(10)
+        alex.left(100)
+        alex.forward(20)
+        alex.right(90)
+        alex.forward(5)
+        alex.right(90)
+        alex.forward(20)
+        alex.left(90)
+        alex.forward(5)
+        alex.right(85)
+        alex.forward(40)
+        alex.left(85)
+        alex.forward(10)
+        alex.right(90)
+        alex.forward(10)
+        alex.left(90)
+        alex.forward(50)
+        alex.right(90)
+        #top
+        alex.forward(5)
+        alex.right(90)
+        alex.forward(50)
+        alex.left(90)
+        alex.forward(10)
+        alex.right(90)
+        alex.forward(10)
+        alex.left(85)
+        alex.forward(40)
+        alex.right(85)
+        alex.forward(5)
+        alex.left(90)
+        alex.forward(20)
+        alex.right(90)
+        alex.forward(5)
+        alex.right(90)
+        alex.forward(20)
+        alex.left(100)
+        alex.forward(10)
+        alex.right(100)
+        alex.forward(20)
+        alex.left(80)
+        alex.forward(160)
+        alex.left(20)
+        alex.forward(160)
+        alex.left(80)
+        alex.forward(30)
+
+    #nashville
+    def nash():
+        alex.forward(20)
+        alex.left(90)
+        alex.forward(200)
+        alex.right(10)
+        alex.forward(60)
+        alex.right(160)
+        alex.forward(60)
+        alex.left(80)
+        alex.forward(50)
+        alex.left(80)
+        alex.forward(60)
+        alex.right(160)
+        alex.forward(60)
+        alex.right(10)
+        alex.forward(200)
+        alex.left(90)
+        alex.forward(20)
+
+    #pencil
+    def pencil():
+        alex.left(90)
+        alex.forward(350)
+        alex.right(30)
+        alex.forward(30)
+        alex.right(120)
+        alex.forward(30)
+        alex.right(30)
+        alex.forward(350)
+        alex.left(90)
+        alex.forward(10)
+
+    #office builing
+    def office():
+        alex.pendown()
+        alex.begin_fill()
+        alex.left(90)
+        alex.forward(400)
+        alex.right(90)
+        coord = alex.position()
+        coords = list(coord)
+        a = coords[0]
+        b = coords[1]
+        alex.forward(50)
+        alex.right(90)
+        alex.forward(400)
+        alex.left(90)
+        alex.forward(15)
+        pos = alex.position()
+        l = list(pos)
+        x = l[0]
+        y = l[1]
+        alex.penup()
+        alex.end_fill()
+        alex.setposition(a+10,b-10)
+        count = 0
+        while count<20:
+            num=0
+            alex.fillcolor("white")
+            while num <=1:
+                alex.begin_fill()
+                alex.pendown()
+                alex.forward(5)
+                alex.right(90)
+                alex.forward(5)
+                alex.right(90)
+                alex.forward(5)
+                alex.right(90)
+                alex.forward(5)
+                alex.right(90)
+                alex.penup()
+                alex.forward(20)
+                num+=1
+                alex.end_fill()
+            alex.backward(40)
+            alex.right(90)
+            alex.forward(20)
+            alex.left(90)
+            count=count+1
+        alex.setposition(x,y)
+        alex.fillcolor("Black")
+        return
+        
+    #apartments
+    def apart():
+        alex.pendown()
+        alex.left(90)
+        alex.forward(300)
+        alex.right(90)
+        alex.forward(100)
+        alex.right(90)
+        alex.forward(300)
+        alex.left(90)
+        alex.forward(15)
+
+    #warehouse
+    def ware():
+        alex.pendown()
+        alex.left(90)
+        alex.forward(250)
+        alex.right(90)
+        alex.forward(150)
+        alex.right(90)
+        alex.forward(250)
+        alex.left(90)
+        alex.forward(15)        
+                
+    alex.begin_fill()
+    twins()
+    needle()
+    nash()
+    pencil()
+    alex.end_fill()
+    office()
+    office()
+    alex.begin_fill()
+    apart()
+    alex.end_fill()
+    office()
+    alex.begin_fill()
+    ware()
+    alex.end_fill()
+    turtle.exitonclick()
+
+    
+    
+        
+    
+    
+
