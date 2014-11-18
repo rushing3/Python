@@ -1,0 +1,38 @@
+from tkinter import *
+from re import findall
+import urllib.request
+
+class win:
+    def __init__(self, bWin):
+        self.f = Frame(bWin).pack(side=TOP)
+        self.fb = Frame(bWin).pack(side=BOTTOM)
+        url = "http://www.cnn.com"
+        response = urllib.request.urlopen(url)
+        html = response.read()
+        self.str = str(html)
+        b = Button(self.f, text="getInfo", command=self.getInfo).pack()
+        
+    def getInfo(self):
+        update = findall("(?:<span>updated) (\d{1,2}:\d{2} \D{2} \D{3}, \D{3} \D{7,8} \d{1,2}, \d{4})", self.str)
+        print(update)
+        update = "Last Updated: " + update[0]
+        market = findall("(?:marketStatus.>)(\D{7} \D{4,6})", self.str)
+        print(market)
+        market = "Market Status: " + market[0]
+        theDow = findall("(?:marketIndex.>)(\d{1,2},\d{3}.\d{2})", self.str)
+        aList = ["Dow","Nasdaq","S&P 500"]
+        print(theDow)
+        dow = aList[0] + ": " + theDow[0] + " points"
+        nasdaq = aList[1] + ": " + theDow[1] + " points"
+        sp = aList[2] + ": " + theDow[2] + " points"
+        lUpdate = Label(self.fb, text=update).pack(side=TOP)
+        lMarket = Label(self.fb, text=market).pack(side=TOP)
+        lDow = Label(self.fb, text=dow).pack(side=TOP)
+        lNasdaq = Label(self.fb, text=nasdaq).pack(side=TOP)
+        lSP = Label(self.fb, text=sp).pack(side=TOP)
+
+    
+app = Tk()
+aWin = win(app)
+app.mainloop()
+
