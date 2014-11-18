@@ -1,0 +1,126 @@
+import turtle
+import csv
+import random
+import drawing as draw
+
+#Part One
+f = open("hangman.csv","r")
+ro = csv.reader(f)
+wordList = []
+hangDict = {}
+easyList = []
+medList = []
+hardList = []
+for item in ro:
+    try:
+        item[0].strip()
+        item[0].strip('\n')
+        if len(item[0])<4:
+            easyList.extend(item)
+        elif len(item[0])>=4 and len(item[0])<=7:
+            medList.extend(item)
+        elif len(item[0])>=8:
+            hardList.extend(item)
+    except:
+        pass
+    
+hangDict['easy']=easyList
+hangDict['medium']=medList
+hangDict['hard']=hardList
+
+#Part Two
+
+#helper function
+def check():
+    global letter
+    while True:
+        try:
+            letter = int(letter)
+            letter = input("Invalid, try again.")
+        except:
+            return letter
+
+def hangman():
+    win = turtle.Screen()
+    lvl = input("Would you like to play easy, medium, or hard?")
+    lvl.lower()
+    if lvl=='easy':
+        aNum = random.randint(0,len(easyList)-1)
+        word = easyList[aNum]
+        aStr = "_"*(len(word))
+        print(aStr)
+        
+    elif lvl=='medium':
+        aNum = random.randint(0,len(easyList)-1)
+        word = medList[aNum]
+        aStr = "_"*(len(word))
+        print(aStr)
+        
+    elif lvl=='hard':
+        aNum = random.randint(0,len(easyList)-1)
+        word = hardList[aNum]
+        aStr = "_"*(len(word))
+        print(aStr)
+    numWrong = -1
+    while aStr!=word:
+        global letter
+        letter = input("Guess a letter!")
+        check()
+        if len(letter)>=2:
+            while len(letter)>=2:
+                letter = input("Invalid, try again.")
+        if letter in word:
+            for y in range(len(word)):
+                if word[y]==letter:
+                    aStr = aStr[:y]+letter+aStr[y+1:]
+                    print(aStr)
+
+        elif letter not in word:
+            numWrong+=1
+            if numWrong==0:
+                draw.stand()
+
+            elif numWrong==1:
+                draw.head()
+
+            elif numWrong==2:
+                draw.body()
+
+            elif numWrong==3:
+                draw.leftarm()
+
+            elif numWrong==4:
+                draw.rightarm()
+
+            elif numWrong==5:
+                draw.leftleg()
+
+            elif numWrong==6:
+                draw.rightleg()
+
+            elif numWrong==7:
+                draw.righthand()
+
+            elif numWrong==8:
+                draw.lefthand()
+
+            elif numWrong==9:
+                draw.rightshoe()
+
+            elif numWrong==10:
+                draw.leftshoe()
+
+            elif numWrong==11:
+                draw.hat()
+
+            elif numWrong==12:
+                draw.shirt()
+
+            elif numWrong==13:
+                draw.pants()
+
+            elif numWrong==14:
+                draw.face()
+                print("You lose!")
+                return
+    print("You win!")
